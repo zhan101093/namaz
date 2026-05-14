@@ -1,0 +1,113 @@
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { movements } from '../data/movements'
+import { ProgressBar } from '../components/ui/ProgressBar'
+
+export function Movements() {
+  const [active, setActive] = useState(0)
+  const current = movements[active]
+
+  return (
+    <main className="max-w-3xl mx-auto px-4 py-8">
+      <div className="mb-6">
+        <Link to="/" className="text-sm text-primary-600 hover:underline">
+          ← Басты бет
+        </Link>
+        <h1 className="text-2xl md:text-3xl font-bold text-primary-900 mt-2">
+          2-бөлім: Намаздың қимылдары
+        </h1>
+        <p className="text-gray-600 mt-1">
+          Тәкбірден саламға дейін — {movements.length} қадам
+        </p>
+      </div>
+
+      <ProgressBar current={active + 1} total={movements.length} label="Қадам" />
+
+      {/* Step card */}
+      <div className="card mt-6 text-center">
+        <div className="text-7xl mb-4">{current.icon}</div>
+        <p
+          className="text-primary-800 mb-1"
+          style={{ fontFamily: "'Noto Naskh Arabic', serif", fontSize: '1.75rem', lineHeight: '2', direction: 'rtl' }}
+        >
+          {current.nameArabic}
+        </p>
+        <h2 className="text-xl font-bold text-gray-900 mb-3">{current.name}</h2>
+        <p className="text-gray-600 leading-relaxed">{current.description}</p>
+        <div className="mt-4 bg-primary-50 border border-primary-100 rounded-xl p-4 text-left">
+          <p className="text-sm text-primary-800 leading-relaxed">{current.detail}</p>
+        </div>
+      </div>
+
+      {/* Step selector */}
+      <div className="mt-6 flex flex-wrap gap-2 justify-center">
+        {movements.map((m, i) => (
+          <button
+            key={m.id}
+            onClick={() => setActive(i)}
+            className={`w-9 h-9 rounded-full text-sm font-semibold transition-colors ${
+              i === active
+                ? 'bg-primary-700 text-white shadow'
+                : i < active
+                ? 'bg-primary-200 text-primary-700'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+            }`}
+            aria-label={`${i + 1}-қадам: ${m.name}`}
+            aria-current={i === active ? 'step' : undefined}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+
+      {/* Nav buttons */}
+      <div className="mt-6 flex justify-between gap-3">
+        <button
+          onClick={() => setActive((p) => Math.max(0, p - 1))}
+          disabled={active === 0}
+          className="btn-secondary disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          ← Алдыңғы
+        </button>
+        {active < movements.length - 1 ? (
+          <button
+            onClick={() => setActive((p) => p + 1)}
+            className="btn-primary"
+          >
+            Келесі →
+          </button>
+        ) : (
+          <Link to="/duas" className="btn-primary">
+            Дұғаларға өту →
+          </Link>
+        )}
+      </div>
+
+      {/* All steps list */}
+      <section className="mt-10">
+        <h2 className="text-lg font-semibold text-gray-700 mb-3">Барлық қадамдар</h2>
+        <div className="flex flex-col gap-2">
+          {movements.map((m, i) => (
+            <button
+              key={m.id}
+              onClick={() => setActive(i)}
+              className={`text-left p-3 rounded-xl border transition-colors ${
+                i === active
+                  ? 'border-primary-400 bg-primary-50'
+                  : 'border-gray-100 bg-white hover:border-primary-200 hover:bg-primary-50/50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">{m.icon}</span>
+                <div>
+                  <span className="text-xs text-gray-400 font-medium">{i + 1}-қадам</span>
+                  <p className="font-medium text-gray-900 text-sm">{m.name}</p>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </section>
+    </main>
+  )
+}

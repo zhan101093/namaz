@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f8faf8;
+  color: #1a2e1a;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.font-arabic {
+  font-family: 'Noto Naskh Arabic', 'Amiri', serif;
+  direction: rtl;
+  line-height: 2;
+  font-size: 1.35rem;
+  letter-spacing: 0.02em;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-800 active:scale-95 transition-all duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700;
+  }
+  .btn-secondary {
+    @apply bg-white text-primary-700 border-2 border-primary-700 px-6 py-3 rounded-xl font-semibold hover:bg-primary-50 active:scale-95 transition-all duration-150;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-5;
+  }
+}

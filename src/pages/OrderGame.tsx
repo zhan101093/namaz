@@ -34,14 +34,14 @@ function shuffle<T>(arr: T[]): T[] {
 interface CardProps {
   id: number
   name: string
-  icon: string
+  image: string
   position: number
   checked: boolean
   isCorrect: boolean
   isDragActive: boolean
 }
 
-function SortableCard({ id, name, icon, position, checked, isCorrect, isDragActive }: CardProps) {
+function SortableCard({ id, name, image, position, checked, isCorrect, isDragActive }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id,
     disabled: checked,
@@ -77,7 +77,7 @@ function SortableCard({ id, name, icon, position, checked, isCorrect, isDragActi
       <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 flex-shrink-0">
         {position + 1}
       </span>
-      <span className="text-2xl flex-shrink-0">{icon}</span>
+      <img src={image} alt={name} className="w-10 h-10 object-contain rounded-lg flex-shrink-0" />
       <span className="flex-1 font-medium text-gray-900 text-sm leading-tight">{name}</span>
       {checked ? (
         <span className={`text-base font-bold flex-shrink-0 ${isCorrect ? 'text-green-500' : 'text-red-400'}`}>
@@ -167,7 +167,7 @@ export function OrderGame() {
                   key={id}
                   id={id}
                   name={movement.name}
-                  icon={movement.icon}
+                  image={movement.image}
                   position={index}
                   checked={checked}
                   isCorrect={id === correctOrder[index]}

@@ -25,7 +25,13 @@ export function Movements() {
 
       {/* Step card */}
       <div className="card mt-6 text-center">
-        <div className="text-7xl mb-4">{current.icon}</div>
+        <div className="flex justify-center mb-4">
+          <img
+            src={current.image}
+            alt={current.name}
+            className="h-52 w-auto object-contain rounded-xl"
+          />
+        </div>
         <p
           className="text-primary-800 mb-1"
           style={{ fontFamily: "'Noto Naskh Arabic', serif", fontSize: '1.75rem', lineHeight: '2', direction: 'rtl' }}

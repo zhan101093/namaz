@@ -32,12 +32,6 @@ export function Movements() {
             className="h-52 w-auto object-contain rounded-xl"
           />
         </div>
-        <p
-          className="text-primary-800 mb-1"
-          style={{ fontFamily: "'Noto Naskh Arabic', serif", fontSize: '1.75rem', lineHeight: '2', direction: 'rtl' }}
-        >
-          {current.nameArabic}
-        </p>
         <h2 className="text-xl font-bold text-gray-900 mb-3">{current.name}</h2>
         <p className="text-gray-600 leading-relaxed">{current.description}</p>
         <div className="mt-4 bg-primary-50 border border-primary-100 rounded-xl p-4 text-left">
@@ -89,31 +83,6 @@ export function Movements() {
         )}
       </div>
 
-      {/* All steps list */}
-      <section className="mt-10">
-        <h2 className="text-lg font-semibold text-gray-700 mb-3">Барлық қадамдар</h2>
-        <div className="flex flex-col gap-2">
-          {movements.map((m, i) => (
-            <button
-              key={m.id}
-              onClick={() => setActive(i)}
-              className={`text-left p-3 rounded-xl border transition-colors ${
-                i === active
-                  ? 'border-primary-400 bg-primary-50'
-                  : 'border-gray-100 bg-white hover:border-primary-200 hover:bg-primary-50/50'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{m.icon}</span>
-                <div>
-                  <span className="text-xs text-gray-400 font-medium">{i + 1}-қадам</span>
-                  <p className="font-medium text-gray-900 text-sm">{m.name}</p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </section>
     </main>
   )
 }

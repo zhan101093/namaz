@@ -5,16 +5,16 @@ interface Pair {
   id: number
   left: string
   right: string
-  icon: string
+  image: string
 }
 
 const pairs: Pair[] = [
-  { id: 1, left: 'Тәкбір', right: 'Аллаhу Акбар', icon: '🙌' },
-  { id: 2, left: 'Руку', right: 'Субхана Раббиял-Азым', icon: '🫄' },
-  { id: 3, left: 'Рукудан тұру', right: 'Самиаллаhу лиман хамидаh', icon: '🧍' },
-  { id: 4, left: 'Сәжде', right: 'Субхана Раббиял-Аъля', icon: '🙇' },
-  { id: 5, left: 'Екі сәжде арасы', right: 'Раббиғфир ли', icon: '🧘' },
-  { id: 6, left: 'Салам', right: 'Ас-саламу алейкум', icon: '🤲' },
+  { id: 1, left: 'Тәкбір', right: 'Аллаhу Акбар', image: '/images/takbir.png' },
+  { id: 2, left: 'Руку', right: 'Субхана Раббиял-Азым', image: '/images/ruku.png' },
+  { id: 3, left: 'Рукудан тұру', right: 'Самиаллаhу лиман хамидаh', image: '/images/niet.png' },
+  { id: 4, left: 'Сәжде', right: 'Субхана Раббиял-Аъля', image: '/images/sajda.png' },
+  { id: 5, left: 'Екі сәжде арасы', right: 'Раббиғфир ли', image: '/images/tashahud-legs.png' },
+  { id: 6, left: 'Сәлем', right: 'Ас-саламу алейкум', image: '/images/salam-right.png' },
 ]
 
 const COLORS = ['#6366f1', '#f59e0b', '#22c55e', '#ef4444', '#3b82f6', '#ec4899']
@@ -190,9 +190,9 @@ export function MatchGame() {
         </svg>
 
         {/* Two columns */}
-        <div className="flex gap-10">
+        <div className="flex gap-8">
           {/* Left: movements */}
-          <div className="flex-1 flex flex-col gap-2.5">
+          <div className="flex-1 flex flex-col gap-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1 text-center">
               Қимылдар
             </p>
@@ -210,7 +210,7 @@ export function MatchGame() {
                   onClick={() => handleLeftClick(pair.id)}
                   disabled={checked}
                   className={[
-                    'flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left text-sm font-medium w-full transition-all duration-150',
+                    'flex items-center gap-2 rounded-xl border-2 px-2 py-1 w-full h-[72px] transition-all duration-150',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
                     isSelected
                       ? 'border-primary-500 bg-primary-50 shadow-md scale-[1.02]'
@@ -225,16 +225,22 @@ export function MatchGame() {
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  <span className="text-lg flex-shrink-0">{pair.icon}</span>
-                  <span className="leading-tight">{pair.left}</span>
+                  <img
+                    src={pair.image}
+                    alt={pair.left}
+                    className="w-10 h-10 object-contain flex-shrink-0 rounded-lg"
+                  />
+                  <span className="flex-1 text-xs font-medium text-gray-900 leading-tight text-left">
+                    {pair.left}
+                  </span>
                   {isConnected && !checked && (
                     <span
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0 ml-auto"
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                       style={{ backgroundColor: color }}
                     />
                   )}
                   {checked && (
-                    <span className={`ml-auto text-base flex-shrink-0 ${isCorrect ? 'text-green-500' : 'text-red-400'}`}>
+                    <span className={`text-base font-bold flex-shrink-0 ${isCorrect ? 'text-green-500' : 'text-red-400'}`}>
                       {isCorrect ? '✓' : '✗'}
                     </span>
                   )}
@@ -244,7 +250,7 @@ export function MatchGame() {
           </div>
 
           {/* Right: duas (shuffled) */}
-          <div className="flex-1 flex flex-col gap-2.5">
+          <div className="flex-1 flex flex-col gap-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1 text-center">
               Дұғалар
             </p>
@@ -264,7 +270,7 @@ export function MatchGame() {
                   onClick={() => handleRightClick(rightId)}
                   disabled={checked}
                   className={[
-                    'flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-left text-sm font-medium w-full transition-all duration-150',
+                    'flex items-center justify-center rounded-xl border-2 px-2 py-1 w-full h-[72px] transition-all duration-150',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400',
                     isCorrect
                       ? 'border-green-400 bg-green-50'
@@ -281,13 +287,15 @@ export function MatchGame() {
                 >
                   {isConnected && !checked && (
                     <span
-                      className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                      className="w-2.5 h-2.5 rounded-full flex-shrink-0 mr-1.5"
                       style={{ backgroundColor: color }}
                     />
                   )}
-                  <span className="italic text-gray-700 leading-tight">{pair.right}</span>
+                  <span className="text-xs italic text-gray-700 leading-snug text-center">
+                    {pair.right}
+                  </span>
                   {checked && (
-                    <span className={`ml-auto text-base flex-shrink-0 ${isCorrect ? 'text-green-500' : 'text-red-400'}`}>
+                    <span className={`ml-auto text-base font-bold flex-shrink-0 ${isCorrect ? 'text-green-500' : 'text-red-400'}`}>
                       {isCorrect ? '✓' : '✗'}
                     </span>
                   )}

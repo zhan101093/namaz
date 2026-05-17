@@ -5,8 +5,10 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
+  DragOverlay,
 } from '@dnd-kit/core'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
 import {
@@ -19,15 +21,16 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { movements } from '../data/movements'
 
+const gameMovements = movements.filter((m) => m.id !== 6)
+const correctOrder = gameMovements.map((m) => m.id)
+
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[a[i], a[j]] = [a[j], a[i]]
   }
-  // ensure result is not already sorted
-  const sorted = movements.map((m) => m.id)
-  if (a.every((v, i) => v === sorted[i])) return shuffle(arr)
+  if (a.every((v, i) => v === correctOrder[i])) return shuffle(arr)
   return a
 }
 
@@ -61,10 +64,10 @@ function SortableCard({ id, name, image, position, checked, isCorrect, isDragAct
       aria-label={name}
       className={[
         'flex items-center gap-3 rounded-2xl border bg-white px-4 py-3 shadow-sm',
-        'select-none outline-none',
+        'select-none outline-none touch-none',
         !checked ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
         isDragging
-          ? 'opacity-40'
+          ? 'opacity-30'
           : isDragActive
           ? 'border-primary-200'
           : 'border-gray-200',
@@ -102,24 +105,26 @@ function SortableCard({ id, name, image, position, checked, isCorrect, isDragAct
   )
 }
 
-const correctOrder = movements.map((m) => m.id)
-
 export function OrderGame() {
   const [items, setItems] = useState<number[]>(() => shuffle(correctOrder))
   const [checked, setChecked] = useState(false)
   const [isDragActive, setIsDragActive] = useState(false)
+  const [activeId, setActiveId] = useState<number | null>(null)
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   )
 
-  function handleDragStart(_event: DragStartEvent) {
+  function handleDragStart(event: DragStartEvent) {
     setIsDragActive(true)
+    setActiveId(event.active.id as number)
   }
 
   function handleDragEnd(event: DragEndEvent) {
     setIsDragActive(false)
+    setActiveId(null)
     const { active, over } = event
     if (over && active.id !== over.id) {
       setItems((prev) => {
@@ -130,8 +135,14 @@ export function OrderGame() {
     }
   }
 
+  function handleDragCancel() {
+    setIsDragActive(false)
+    setActiveId(null)
+  }
+
   const correctCount = items.filter((id, i) => id === correctOrder[i]).length
   const allCorrect = correctCount === correctOrder.length
+  const activeMovement = activeId ? gameMovements.find((m) => m.id === activeId) : null
 
   function handleRestart() {
     setItems(shuffle(correctOrder))
@@ -148,7 +159,7 @@ export function OrderGame() {
           Ойын — Қимылдар реті
         </h1>
         <p className="text-gray-500 mt-1 text-sm">
-          Намаздың 8 қимылын дұрыс ретке келтір. Карточкаларды сүйреп орналастыр.
+          Намаздың {gameMovements.length} қимылын дұрыс ретке келтір. Карточкаларды сүйреп орналастыр.
         </p>
       </div>
 
@@ -157,11 +168,12 @@ export function OrderGame() {
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
         <SortableContext items={items} strategy={verticalListSortingStrategy}>
           <div className="flex flex-col gap-2">
             {items.map((id, index) => {
-              const movement = movements.find((m) => m.id === id)!
+              const movement = gameMovements.find((m) => m.id === id)!
               return (
                 <SortableCard
                   key={id}
@@ -177,6 +189,21 @@ export function OrderGame() {
             })}
           </div>
         </SortableContext>
+
+        <DragOverlay dropAnimation={null}>
+          {activeMovement ? (
+            <div className="flex items-center gap-3 rounded-2xl border-2 border-primary-400 bg-white px-4 py-3 shadow-2xl">
+              <img
+                src={activeMovement.image}
+                alt={activeMovement.name}
+                className="w-10 h-10 object-contain rounded-lg flex-shrink-0"
+              />
+              <span className="flex-1 font-medium text-gray-900 text-sm leading-tight">
+                {activeMovement.name}
+              </span>
+            </div>
+          ) : null}
+        </DragOverlay>
       </DndContext>
 
       <div className="mt-6">
@@ -187,7 +214,7 @@ export function OrderGame() {
         ) : (
           <div className="card text-center py-6">
             <p className="text-4xl mb-3">
-              {allCorrect ? '🎉' : correctCount >= 6 ? '👍' : '💪'}
+              {allCorrect ? '🎉' : correctCount >= 5 ? '👍' : '💪'}
             </p>
             <p className="text-xl font-bold text-gray-900 mb-1">
               {correctCount} / {correctOrder.length} дұрыс
@@ -195,7 +222,7 @@ export function OrderGame() {
             <p className="text-gray-600 text-sm mb-5">
               {allCorrect
                 ? 'МашаАллаh! Барлық қимылды дұрыс реттедің!'
-                : correctCount >= 6
+                : correctCount >= 5
                 ? 'Жақсы нәтиже! Қайта байқап 100% жеткіз.'
                 : 'Қайталап байқа — намаз қимылдарын оқып шық.'}
             </p>

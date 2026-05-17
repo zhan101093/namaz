@@ -75,7 +75,6 @@ export const duas: Dua[] = [
     arabic: 'رَبِّ اغْفِرْ لِي',
     transliteration: 'Раббиғфир ли',
     translation: 'Раббым! Маған кешірім бер',
-    repeats: 3,
   },
   {
     id: 9,

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 
 interface ArabicAudioButtonProps {
   text: string
@@ -9,17 +9,39 @@ function cleanForTTS(arabic: string): string {
   return arabic
     .replace(/[۝﷽]/g, ' ')
     .replace(/[،؛]/g, ',')
+    .replace(/\./g, ' ')
     .replace(/\s+/g, ' ')
     .trim()
+}
+
+function getArabicVoice(): SpeechSynthesisVoice | null {
+  const voices = window.speechSynthesis.getVoices()
+  return (
+    voices.find((v) => v.lang === 'ar-SA') ??
+    voices.find((v) => v.lang.startsWith('ar')) ??
+    null
+  )
 }
 
 export function ArabicAudioButton({ text, className = '' }: ArabicAudioButtonProps) {
   const [speaking, setSpeaking] = useState(false)
   const [supported, setSupported] = useState(false)
+  const keepAliveRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => {
-    setSupported('speechSynthesis' in window)
-    return () => { window.speechSynthesis?.cancel() }
+    if (!('speechSynthesis' in window)) return
+    setSupported(true)
+
+    // Voices load asynchronously — trigger a load
+    window.speechSynthesis.getVoices()
+    const onVoicesChanged = () => setSupported(true)
+    window.speechSynthesis.addEventListener('voiceschanged', onVoicesChanged)
+
+    return () => {
+      window.speechSynthesis.removeEventListener('voiceschanged', onVoicesChanged)
+      window.speechSynthesis.cancel()
+      if (keepAliveRef.current) clearInterval(keepAliveRef.current)
+    }
   }, [])
 
   const handleClick = useCallback(() => {
@@ -27,6 +49,10 @@ export function ArabicAudioButton({ text, className = '' }: ArabicAudioButtonPro
 
     if (speaking) {
       window.speechSynthesis.cancel()
+      if (keepAliveRef.current) {
+        clearInterval(keepAliveRef.current)
+        keepAliveRef.current = null
+      }
       setSpeaking(false)
       return
     }
@@ -35,18 +61,51 @@ export function ArabicAudioButton({ text, className = '' }: ArabicAudioButtonPro
 
     const utterance = new SpeechSynthesisUtterance(cleanForTTS(text))
     utterance.lang = 'ar-SA'
-    utterance.rate = 0.72
+    utterance.rate = 0.7
     utterance.pitch = 1.0
 
-    const voices = window.speechSynthesis.getVoices()
-    const arabicVoice = voices.find((v) => v.lang.startsWith('ar'))
-    if (arabicVoice) utterance.voice = arabicVoice
+    const voice = getArabicVoice()
+    if (voice) utterance.voice = voice
 
-    utterance.onend = () => setSpeaking(false)
-    utterance.onerror = () => setSpeaking(false)
+    utterance.onstart = () => {
+      setSpeaking(true)
+      // Chrome stops after ~15s — pause/resume workaround
+      keepAliveRef.current = setInterval(() => {
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.pause()
+          window.speechSynthesis.resume()
+        }
+      }, 10000)
+    }
 
-    setSpeaking(true)
-    window.speechSynthesis.speak(utterance)
+    utterance.onend = () => {
+      setSpeaking(false)
+      if (keepAliveRef.current) {
+        clearInterval(keepAliveRef.current)
+        keepAliveRef.current = null
+      }
+    }
+
+    utterance.onerror = () => {
+      setSpeaking(false)
+      if (keepAliveRef.current) {
+        clearInterval(keepAliveRef.current)
+        keepAliveRef.current = null
+      }
+    }
+
+    // Voices may still be loading — wait if empty
+    const trySpeak = () => {
+      const voice2 = getArabicVoice()
+      if (voice2) utterance.voice = voice2
+      window.speechSynthesis.speak(utterance)
+    }
+
+    if (window.speechSynthesis.getVoices().length === 0) {
+      window.speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true })
+    } else {
+      trySpeak()
+    }
   }, [text, speaking])
 
   if (!supported) return null
